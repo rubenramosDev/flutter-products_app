@@ -115,6 +115,7 @@ class LoginPage extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'ejemplo@correo.com',
                 labelText: 'Correo electronico',
+                //errorText: 'Invalid email',
                 counterText: snapshot.data,
                 icon: Icon(
                   Icons.alternate_email,
@@ -138,6 +139,8 @@ class LoginPage extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: '*******',
                 labelText: 'Password',
+                errorText: snapshot.error,
+                errorMaxLines: 2,
                 icon: Icon(Icons.lock_outline, color: Colors.deepPurple),
                 counterText: snapshot.data,
               ),

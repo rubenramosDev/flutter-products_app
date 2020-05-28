@@ -1,6 +1,9 @@
 import 'dart:async';
 
-class LoginBloc {
+import 'package:productsapp/src/blocs/validators.dart';
+
+/*Mixing*/
+class LoginBloc with Validators{
   final _emailController    = StreamController<String>.broadcast();
   final _passwordController = StreamController<String>.broadcast();
 
@@ -11,7 +14,7 @@ class LoginBloc {
 
   /*Listening stream values*/
   Stream<String> get emailStream    => _emailController.stream;
-  Stream<String> get passwordStream => _passwordController.stream;
+  Stream<String> get passwordStream => _passwordController.stream.transform(validatePassword);
 
 
   /*To finish both stream controllers. We validate with ?, if is not open, donsent execute the code*/
