@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:productsapp/src/model/Product.dart';
 import 'package:productsapp/src/services/product_service.dart';
 import 'package:productsapp/src/utils/utils.dart' as utils;
@@ -18,24 +21,42 @@ class ProductPage extends StatefulWidget {
 }
 
 class _ProductPageState extends State<ProductPage> {
+  /*We create an special key to make reference to the scaffold, in that
+  * way the snackbar can show up*/
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+
   final formKey = GlobalKey<FormState>();
   ProductModel product = new ProductModel();
 
   final productoService = new ProductService();
 
+  bool _flag = false;
+
+  /*To save an image or file*/
+  PickedFile file;
+
   @override
   Widget build(BuildContext context) {
+    /*Before creating the form, we verify if the past page send us a value in the 
+    * arguments. If arguments is not null, we must update a product, not create a new one */
+    final ProductModel productModel = ModalRoute.of(context).settings.arguments;
+
+    if (productModel != null) {
+      product = productModel;
+    }
+
     return Scaffold(
+      key: scaffoldKey,
       appBar: AppBar(
         title: Text('Product'),
         actions: [
           IconButton(
             icon: Icon(Icons.photo_size_select_actual),
-            onPressed: () {},
+            onPressed: () => _processingImage(ImageSource.gallery),
           ),
           IconButton(
             icon: Icon(Icons.camera_alt),
-            onPressed: () {},
+            onPressed: () => _processingImage(ImageSource.camera),
           )
         ],
       ),
@@ -46,6 +67,7 @@ class _ProductPageState extends State<ProductPage> {
             key: formKey,
             child: Column(
               children: [
+                _showingPhoto(),
                 _creatingName(),
                 _creatingPrice(),
                 _creatingAvailable(),
@@ -82,7 +104,7 @@ class _ProductPageState extends State<ProductPage> {
 
   Widget _creatingPrice() {
     return TextFormField(
-      //  initialValue: product.valor.toString(),
+      initialValue: product.valor.toString(),
       keyboardType: TextInputType.numberWithOptions(decimal: true),
       decoration: InputDecoration(labelText: 'Price'),
       validator: (value) {
@@ -100,7 +122,7 @@ class _ProductPageState extends State<ProductPage> {
     return RaisedButton.icon(
       label: Text('Save'),
       icon: Icon(Icons.save),
-      onPressed: () => _submit(),
+      onPressed: (_flag) ? null : _submit,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20.0),
       ),
@@ -115,8 +137,21 @@ class _ProductPageState extends State<ProductPage> {
 
     /*Is correct!*/
     formKey.currentState.save();
+
+    setState(() {
+      _flag = true;
+    });
+
     product.titulo = product.titulo.trim();
-    productoService.createProduct(product);
+
+    if (product == null) {
+      productoService.createProduct(product);
+    } else {
+      productoService.updateProduct(product);
+    }
+
+    _creatingSnackbar('Successfully saved.');
+    Navigator.pop(context);
   }
 
   Widget _creatingAvailable() {
@@ -127,5 +162,37 @@ class _ProductPageState extends State<ProductPage> {
         product.disponible = value;
       }),
     );
+  }
+
+  void _creatingSnackbar(String message) {
+    final snackbar = SnackBar(
+      content: Text(message),
+      duration: Duration(milliseconds: 1500),
+    );
+
+    scaffoldKey.currentState.showSnackBar(snackbar);
+  }
+
+  Widget _showingPhoto() {
+    if (product.fotoUrl != null) {
+      //TODO
+      return Container();
+    } else {
+      return Image(
+        image: AssetImage(file?.path ?? 'assets/img2.png'),
+        height: 300.0,
+        fit: BoxFit.cover,
+      );
+    }
+  }
+
+  void _processingImage(ImageSource origin) async {
+    file = await ImagePicker.platform.pickImage(source: origin);
+
+    if (file != null) {
+      //
+    }
+
+    setState(() {});
   }
 }

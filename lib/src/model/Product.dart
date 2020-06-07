@@ -28,8 +28,9 @@ class ProductModel {
         fotoUrl    : json["fotoUrl"],
       );
 
+  /*We comment the id vablue to avoid to overwrite the id on firebase*/
   Map<String, dynamic> toJson() => {
-        "id"         : id,
+//        "id"         : id,
         "titulo"     : titulo,
         "valor"      : valor,
         "disponible" : disponible,

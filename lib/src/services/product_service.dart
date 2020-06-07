@@ -16,6 +16,16 @@ class ProductService {
     return true;
   }
 
+  Future<bool> updateProduct(ProductModel product) async {
+    final url = '$_url/products/${product.id}.json';
+
+    final response = await http.put(url, body: productModelToJson(product));
+    final decodeData = jsonDecode(response.body);
+    print(decodeData);
+
+    return true;
+  }
+
   Future<List<ProductModel>> getAllProducts() async {
     final url = '$_url/products.json';
 
@@ -26,10 +36,17 @@ class ProductService {
     if (data == null) return [];
 
     data.forEach((id, product) {
-      final temporalProducto = productModelFromJson(product);
+      final temporalProducto = ProductModel.fromJson(product);
       temporalProducto.id = id;
       listProducts.add(temporalProducto);
     });
     return listProducts;
+  }
+
+  Future<int> deleteProduct(String id) async {
+    final url = '$_url/products/$id.json';
+    final response = await http.delete(url);
+    print(json.decode(response.body));
+    return 1;
   }
 }

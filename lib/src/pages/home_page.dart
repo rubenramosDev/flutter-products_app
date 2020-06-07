@@ -11,7 +11,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: Text('HomePage'),
       ),
-      body: _fetchingData(),
+      body: _fetchingData(context),
       floatingActionButton: _creatingButton(context),
     );
   }
@@ -23,17 +23,38 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _fetchingData() {
+  Widget _fetchingData(BuildContext context) {
     return FutureBuilder(
       future: productService.getAllProducts(),
       builder:
           (BuildContext context, AsyncSnapshot<List<ProductModel>> snapshot) {
         if (snapshot.hasData) {
-          return Container();
+          final products = snapshot.data;
+          return ListView.builder(
+            itemCount: products.length,
+            itemBuilder: (context, i) => _createItem(products[i], context),
+          );
         } else {
           return Center(child: CircularProgressIndicator());
         }
       },
+    );
+  }
+
+  Widget _createItem(ProductModel product, BuildContext context) {
+    return Dismissible(
+      key: UniqueKey(),
+      onDismissed: (direction) {
+        productService.deleteProduct(product.id);
+      },
+      background: Container(
+        color: Colors.red,
+      ),
+      child: ListTile(
+        title: Text('${product.titulo} - ${product.valor}'),
+        subtitle: Text('$product.id'),
+        onTap: () => Navigator.pushNamed(context, 'product',arguments: product),
+      ),
     );
   }
 }
