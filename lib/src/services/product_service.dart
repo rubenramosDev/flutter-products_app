@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:productsapp/src/model/Product.dart';
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:mime_type/mime_type.dart';
+import 'package:http_parser/http_parser.dart';
 
 class ProductService {
   final String _url = 'https://flutter-lambda.firebaseio.com';
@@ -48,5 +52,30 @@ class ProductService {
     final response = await http.delete(url);
     print(json.decode(response.body));
     return 1;
+  }
+
+  Future<String> uploadImage(File imagen) async {
+    final url = Uri.parse(
+        'https://api.cloudinary.com/v1_1/dpysjwg7e/image/upload?upload_preset=xofchc8x');
+    final mimeType = mime(imagen.path).split('/');
+
+    final imageRequest = http.MultipartRequest('POST', url);
+
+    final file = await http.MultipartFile.fromPath('file', imagen.path,
+        contentType: MediaType(mimeType[0], mimeType[1]));
+
+    imageRequest.files.add(file);
+    final requestResponse = await imageRequest.send();
+
+    final response = await http.Response.fromStream(requestResponse);
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      print('Error ${response.body}');
+      return null;
+    }
+
+    final responseData = json.decode(response.body);
+    return responseData['secure_url'];
+
   }
 }

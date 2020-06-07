@@ -24,16 +24,13 @@ class _ProductPageState extends State<ProductPage> {
   /*We create an special key to make reference to the scaffold, in that
   * way the snackbar can show up*/
   final scaffoldKey = GlobalKey<ScaffoldState>();
-
   final formKey = GlobalKey<FormState>();
   ProductModel product = new ProductModel();
-
   final productoService = new ProductService();
-
   bool _flag = false;
 
   /*To save an image or file*/
-  PickedFile file;
+  PickedFile pickedFile;
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +76,8 @@ class _ProductPageState extends State<ProductPage> {
       ),
     );
   }
+
+  /*METHODS*/
 
   Widget _creatingName() {
     /*To bind the object with the formfield, we use as initialValue
@@ -131,7 +130,7 @@ class _ProductPageState extends State<ProductPage> {
     );
   }
 
-  void _submit() {
+  void _submit() async {
     /*Is not correct*/
     if (!formKey.currentState.validate()) return;
 
@@ -141,6 +140,12 @@ class _ProductPageState extends State<ProductPage> {
     setState(() {
       _flag = true;
     });
+
+    if (pickedFile != null) {
+      File file = File(pickedFile.path);
+
+      product.fotoUrl = await productoService.uploadImage(file);
+    }
 
     product.titulo = product.titulo.trim();
 
@@ -175,11 +180,15 @@ class _ProductPageState extends State<ProductPage> {
 
   Widget _showingPhoto() {
     if (product.fotoUrl != null) {
-      //TODO
-      return Container();
+      return FadeInImage(
+        image: NetworkImage(product.fotoUrl),
+        placeholder: AssetImage('assets/img1.gif'),
+        height: 300.0,
+        fit: BoxFit.contain,
+      );
     } else {
       return Image(
-        image: AssetImage(file?.path ?? 'assets/img2.png'),
+        image: AssetImage(pickedFile?.path ?? 'assets/img2.png'),
         height: 300.0,
         fit: BoxFit.cover,
       );
@@ -187,10 +196,10 @@ class _ProductPageState extends State<ProductPage> {
   }
 
   void _processingImage(ImageSource origin) async {
-    file = await ImagePicker.platform.pickImage(source: origin);
+    pickedFile = await ImagePicker.platform.pickImage(source: origin);
 
-    if (file != null) {
-      //
+    if (pickedFile != null) {
+      product.fotoUrl = null;
     }
 
     setState(() {});
