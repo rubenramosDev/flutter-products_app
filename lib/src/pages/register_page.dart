@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-
-import 'package:productsapp/src/services/user_service.dart';
 import 'package:productsapp/src/blocs/provider.dart';
+import 'package:productsapp/src/services/user_service.dart';
 import 'package:productsapp/src/utils/utils.dart';
 
-class LoginPage extends StatelessWidget {
-  final _userProvider = new UserService();
+class RegisterPage extends StatelessWidget {
+  final _userService = new UserService();
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +89,7 @@ class LoginPage extends StatelessWidget {
                 ]),
             child: Column(
               children: [
-                Text('Ingreso', style: TextStyle(fontSize: 20.0)),
+                Text('Nueva cuenta', style: TextStyle(fontSize: 20.0)),
                 SizedBox(height: 60.0),
                 _creatingEmail(bloc),
                 SizedBox(height: 30.0),
@@ -101,9 +100,8 @@ class LoginPage extends StatelessWidget {
             ),
           ),
           FlatButton(
-            child: Text('Registrate'),
-            onPressed: () =>
-                Navigator.pushReplacementNamed(context, 'registro'),
+            child: Text('Already have an account?'),
+            onPressed: () => Navigator.pushReplacementNamed(context, 'login'),
           )
         ],
       ),
@@ -161,7 +159,7 @@ class LoginPage extends StatelessWidget {
       stream: bloc.formValidStream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         return RaisedButton(
-          onPressed: snapshot.hasData ? () => _login(context, bloc) : null,
+          onPressed: snapshot.hasData ? () => _register(context, bloc) : null,
           elevation: 1.0,
           color: Colors.deepPurple,
           textColor: Colors.white,
@@ -177,12 +175,16 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  _login(BuildContext context, LoginBloc bloc) async {
-    final Map info = await _userProvider.login(bloc.valueEmail, bloc.valuePassword);
+  _register(BuildContext context, LoginBloc bloc) async {
+    final _userProvider = new UserService();
+
+    final Map info =
+        await _userProvider.login(bloc.valueEmail, bloc.valuePassword);
     if (info['ok']) {
       Navigator.pushReplacementNamed(context, 'home');
     } else {
       showingAlert(context, info['message']);
     }
+    _userService.newUser(bloc.valueEmail, bloc.valuePassword);
   }
 }

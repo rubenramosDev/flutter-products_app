@@ -1,17 +1,18 @@
-import 'dart:io';
-
 import 'package:productsapp/src/model/Product.dart';
 
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:mime_type/mime_type.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:productsapp/src/preferences/preferencias_usuario.dart';
 
 class ProductService {
   final String _url = 'https://flutter-lambda.firebaseio.com';
+  final _prefs = new PreferenciasUsuario();
 
   Future<bool> createProduct(ProductModel product) async {
-    final url = '$_url/products.json';
+    final url = '$_url/products.json?auth=${_prefs.token}';
 
     final response = await http.post(url, body: productModelToJson(product));
     final decodeData = jsonDecode(response.body);
@@ -21,7 +22,7 @@ class ProductService {
   }
 
   Future<bool> updateProduct(ProductModel product) async {
-    final url = '$_url/products/${product.id}.json';
+    final url = '$_url/products/${product.id}.json?auth=${_prefs.token}';
 
     final response = await http.put(url, body: productModelToJson(product));
     final decodeData = jsonDecode(response.body);
@@ -31,7 +32,7 @@ class ProductService {
   }
 
   Future<List<ProductModel>> getAllProducts() async {
-    final url = '$_url/products.json';
+    final url = '$_url/products.json?auth=${_prefs.token}';
 
     final response = await http.get(url);
     final Map<String, dynamic> data = jsonDecode(response.body);
@@ -48,7 +49,7 @@ class ProductService {
   }
 
   Future<int> deleteProduct(String id) async {
-    final url = '$_url/products/$id.json';
+    final url = '$_url/products/$id.json?auth=${_prefs.token}';
     final response = await http.delete(url);
     print(json.decode(response.body));
     return 1;
@@ -76,6 +77,5 @@ class ProductService {
 
     final responseData = json.decode(response.body);
     return responseData['secure_url'];
-
   }
 }
