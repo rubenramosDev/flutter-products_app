@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'login_bloc.dart';
-export 'login_bloc.dart';
+
+
+import 'package:productsapp/src/blocs/login_bloc.dart';
+import 'package:productsapp/src/blocs/products_bloc.dart';
+
+export 'package:productsapp/src/blocs/login_bloc.dart';
+export 'package:productsapp/src/blocs/products_bloc.dart';
 
 /*InheritedWidget helps us to pass values all across the app without being obligated of 
 sending the value in each widget. So, we can pass a value from the very top of our widget tree till 
@@ -10,7 +15,8 @@ https://api.flutter.dev/flutter/widgets/InheritedWidget-class.html
 */
 
 class InheritedWidgetLogicBlocProvider extends InheritedWidget {
-  final loginBloc = LoginBloc();
+  final loginBloc     = new LoginBloc();
+  final _productsBloc = new ProductsBloc();
 
   InheritedWidgetLogicBlocProvider({Key key, Widget child})
       : super(key: key, child: child);
@@ -22,5 +28,11 @@ class InheritedWidgetLogicBlocProvider extends InheritedWidget {
     return (context
         .dependOnInheritedWidgetOfExactType<InheritedWidgetLogicBlocProvider>()
         .loginBloc);
+  }
+
+  static ProductsBloc productsBloc(BuildContext context) {
+    return (context
+        .dependOnInheritedWidgetOfExactType<InheritedWidgetLogicBlocProvider>()
+        ._productsBloc);
   }
 }

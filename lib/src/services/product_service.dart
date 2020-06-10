@@ -39,6 +39,7 @@ class ProductService {
     final List<ProductModel> listProducts = new List();
 
     if (data == null) return [];
+    if(data['error'] != null) return [];
 
     data.forEach((id, product) {
       final temporalProducto = ProductModel.fromJson(product);

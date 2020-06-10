@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:productsapp/src/blocs/provider.dart';
 import 'package:productsapp/src/model/Product.dart';
-import 'package:productsapp/src/services/product_service.dart';
 import 'package:productsapp/src/utils/utils.dart' as utils;
 
 class ProductPage extends StatefulWidget {
@@ -26,17 +26,20 @@ class _ProductPageState extends State<ProductPage> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final formKey = GlobalKey<FormState>();
   ProductModel product = new ProductModel();
-  final productoService = new ProductService();
   bool _flag = false;
 
   /*To save an image or file*/
   PickedFile pickedFile;
+
+  ProductsBloc _productsBloc;
 
   @override
   Widget build(BuildContext context) {
     /*Before creating the form, we verify if the past page send us a value in the 
     * arguments. If arguments is not null, we must update a product, not create a new one */
     final ProductModel productModel = ModalRoute.of(context).settings.arguments;
+
+    _productsBloc = InheritedWidgetLogicBlocProvider.productsBloc(context);
 
     if (productModel != null) {
       product = productModel;
@@ -144,15 +147,15 @@ class _ProductPageState extends State<ProductPage> {
     if (pickedFile != null) {
       File file = File(pickedFile.path);
 
-      product.fotoUrl = await productoService.uploadImage(file);
+      product.fotoUrl = await _productsBloc.uploadingFile(file);
     }
 
     product.titulo = product.titulo.trim();
 
     if (product == null) {
-      productoService.createProduct(product);
+      _productsBloc.creatingProduct(product);
     } else {
-      productoService.updateProduct(product);
+      _productsBloc.updatingProduct(product);
     }
 
     _creatingSnackbar('Successfully saved.');
